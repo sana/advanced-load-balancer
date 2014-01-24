@@ -6,10 +6,29 @@
 	objectVersion = 46;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		32939229186EDE1D003D61B4 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 32939228186EDE1D003D61B4 /* main.c */; };
-		3293922B186EDE1D003D61B4 /* advanced_load_balancer.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3293922A186EDE1D003D61B4 /* advanced_load_balancer.1 */; };
-/* End PBXBuildFile section */
+/* Begin PBXContainerItemProxy section */
+		3293924A186EDED5003D61B4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 32939246186EDED5003D61B4 /* broker-impl.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 3293923A186EDED5003D61B4;
+			remoteInfo = "broker-impl";
+		};
+		32939270186EE206003D61B4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3293926B186EE206003D61B4 /* server-impl.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 3293925F186EE206003D61B4;
+			remoteInfo = "server-impl";
+		};
+		3293928B186EE298003D61B4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 32939287186EE297003D61B4 /* client-impl.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 3293927B186EE297003D61B4;
+			remoteInfo = "client-impl";
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		32939223186EDE1D003D61B4 /* CopyFiles */ = {
@@ -18,16 +37,18 @@
 			dstPath = /usr/share/man/man1/;
 			dstSubfolderSpec = 0;
 			files = (
-				3293922B186EDE1D003D61B4 /* advanced_load_balancer.1 in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		32939225186EDE1D003D61B4 /* advanced-load-balancer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "advanced-load-balancer"; sourceTree = BUILT_PRODUCTS_DIR; };
-		32939228186EDE1D003D61B4 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
-		3293922A186EDE1D003D61B4 /* advanced_load_balancer.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = advanced_load_balancer.1; sourceTree = "<group>"; };
+		323A21CD186EEB2400050F4E /* advanced-load-balancer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "advanced-load-balancer"; sourceTree = BUILT_PRODUCTS_DIR; };
+		32939246186EDED5003D61B4 /* broker-impl.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "broker-impl.xcodeproj"; path = "broker-impl/broker-impl.xcodeproj"; sourceTree = "<group>"; };
+		32939251186EE033003D61B4 /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
+		32939253186EE033003D61B4 /* zhelpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zhelpers.h; sourceTree = "<group>"; };
+		3293926B186EE206003D61B4 /* server-impl.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "server-impl.xcodeproj"; path = "server-impl/server-impl.xcodeproj"; sourceTree = "<group>"; };
+		32939287186EE297003D61B4 /* client-impl.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "client-impl.xcodeproj"; path = "client-impl/client-impl.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,26 +65,61 @@
 		3293921C186EDE1D003D61B4 = {
 			isa = PBXGroup;
 			children = (
-				32939227186EDE1D003D61B4 /* advanced-load-balancer */,
-				32939226186EDE1D003D61B4 /* Products */,
+				32939287186EE297003D61B4 /* client-impl.xcodeproj */,
+				3293926B186EE206003D61B4 /* server-impl.xcodeproj */,
+				3293924F186EE033003D61B4 /* common */,
+				32939246186EDED5003D61B4 /* broker-impl.xcodeproj */,
+				323A21CD186EEB2400050F4E /* advanced-load-balancer */,
 			);
 			sourceTree = "<group>";
 		};
-		32939226186EDE1D003D61B4 /* Products */ = {
+		32939247186EDED5003D61B4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				32939225186EDE1D003D61B4 /* advanced-load-balancer */,
+				3293924B186EDED5003D61B4 /* broker-impl */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		32939227186EDE1D003D61B4 /* advanced-load-balancer */ = {
+		3293924F186EE033003D61B4 /* common */ = {
 			isa = PBXGroup;
 			children = (
-				32939228186EDE1D003D61B4 /* main.c */,
-				3293922A186EDE1D003D61B4 /* advanced_load_balancer.1 */,
+				32939250186EE033003D61B4 /* include */,
+				32939252186EE033003D61B4 /* lib */,
 			);
-			path = "advanced-load-balancer";
+			path = common;
+			sourceTree = "<group>";
+		};
+		32939250186EE033003D61B4 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				32939251186EE033003D61B4 /* common.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		32939252186EE033003D61B4 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				32939253186EE033003D61B4 /* zhelpers.h */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
+		3293926C186EE206003D61B4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				32939271186EE206003D61B4 /* server-impl */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		32939288186EE297003D61B4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3293928C186EE298003D61B4 /* client-impl */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -83,7 +139,7 @@
 			);
 			name = "advanced-load-balancer";
 			productName = "advanced-load-balancer";
-			productReference = 32939225186EDE1D003D61B4 /* advanced-load-balancer */;
+			productReference = 323A21CD186EEB2400050F4E /* advanced-load-balancer */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -103,8 +159,22 @@
 				en,
 			);
 			mainGroup = 3293921C186EDE1D003D61B4;
-			productRefGroup = 32939226186EDE1D003D61B4 /* Products */;
+			productRefGroup = 3293921C186EDE1D003D61B4;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 32939247186EDED5003D61B4 /* Products */;
+					ProjectRef = 32939246186EDED5003D61B4 /* broker-impl.xcodeproj */;
+				},
+				{
+					ProductGroup = 32939288186EE297003D61B4 /* Products */;
+					ProjectRef = 32939287186EE297003D61B4 /* client-impl.xcodeproj */;
+				},
+				{
+					ProductGroup = 3293926C186EE206003D61B4 /* Products */;
+					ProjectRef = 3293926B186EE206003D61B4 /* server-impl.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				32939224186EDE1D003D61B4 /* advanced-load-balancer */,
@@ -112,12 +182,35 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXReferenceProxy section */
+		3293924B186EDED5003D61B4 /* broker-impl */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = "broker-impl";
+			remoteRef = 3293924A186EDED5003D61B4 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		32939271186EE206003D61B4 /* server-impl */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = "server-impl";
+			remoteRef = 32939270186EE206003D61B4 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		3293928C186EE298003D61B4 /* client-impl */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = "client-impl";
+			remoteRef = 3293928B186EE298003D61B4 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
 /* Begin PBXSourcesBuildPhase section */
 		32939221186EDE1D003D61B4 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				32939229186EDE1D003D61B4 /* main.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -225,6 +318,7 @@
 				32939230186EDE1D003D61B4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
