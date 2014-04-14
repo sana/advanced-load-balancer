@@ -49,6 +49,7 @@
 		32939253186EE033003D61B4 /* zhelpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zhelpers.h; sourceTree = "<group>"; };
 		3293926B186EE206003D61B4 /* server-impl.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "server-impl.xcodeproj"; path = "server-impl/server-impl.xcodeproj"; sourceTree = "<group>"; };
 		32939287186EE297003D61B4 /* client-impl.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "client-impl.xcodeproj"; path = "client-impl/client-impl.xcodeproj"; sourceTree = "<group>"; };
+		32D1AB4F18A8BEC50071D61D /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,6 +66,7 @@
 		3293921C186EDE1D003D61B4 = {
 			isa = PBXGroup;
 			children = (
+				32D1AB4F18A8BEC50071D61D /* README */,
 				32939287186EE297003D61B4 /* client-impl.xcodeproj */,
 				3293926B186EE206003D61B4 /* server-impl.xcodeproj */,
 				3293924F186EE033003D61B4 /* common */,

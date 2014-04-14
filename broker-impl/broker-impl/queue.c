@@ -2,8 +2,8 @@
  Load balancer for clients that want to execute commands on remote servers,
  using the 0-MQ library.
  
- We implemented a queue with atomic operations. The queue supports a shuffeling operation
- for the client code that requests balancing across the requests set.
+ We implemented a queue with atomic operations. The queue supports a shuffeling
+ operation for the client code that requests balancing across the requests set.
  
  Copyright (C) 2013 Laurentiu Dascalu (ldascalu@twitter.com).
  
@@ -40,139 +40,94 @@ typedef struct __queue_t {
     void (*delete)(void *head);
     
     // Pushes an element in the queue; the head might be modified
-    int (*push)(struct __queue_t *q, void *key);
+    int (*push)(queue_t q, void *key);
 
     // Removes an element in the queue; the head might be modified
-    int (*remove_key)(struct __queue_t *q, void *key, int (*compare)(void *key1, void *key2));
+    int (*remove_key)(queue_t q, void *key,
+        int (*compare)(void *key1, void *key2));
     
-    //_queue_get_key
+    // Returns an element in the queue
+    void *(*get_key)(void *head, int index);
     
     // Iterates over a queue
     void (*iterate)(void *head, void (*iterator)(void *key));
 } *_queue_t;
 
-// Doubly linked list queue
-typedef struct __queue_node_t {
-    void *key;
-    struct __queue_node_t *prev;
-    struct __queue_node_t *next;
-} *queue_node_t;
+/* Circular doubly linked list implementation */
+static void rr_queue_delete(void *head);
+static int rr_queue_push(queue_t q, void *key);
+static int rr_queue_remove_key(queue_t q, void *key,
+    int (*compare)(void *key1, void *key2));
+static void *rr_queue_get_key(void *head, int index);
+static void rr_queue_iterate(void *head, void (*iterator)(void *key));
 
-static
-void _queue_delete(queue_node_t q) {
-    if (!q) {
-        return;
-    }
-    if (!q->next) {
-        free(q);
-    } else {
-        queue_node_t prev = q;
-        q = q->next;
-        do {
-            free(prev);
-            prev = q;
-            q = q ? q->next : NULL;
-        } while (prev);
-    }
-}
-
-static
-int _queue_push(_queue_t q, void *key) {
-    queue_node_t new_node = (queue_node_t) malloc(sizeof(struct __queue_node_t));
-
-    if (!new_node) {
-        return OUT_OF_MEMORY_EXCEPTION;
-    }
-    
-    new_node->key = key;
-    new_node->prev = new_node->next = NULL;
-    
-    if (!q->head) {
-        // Set the queue's head to the new node
-        q->head = new_node;
-    } else {
-        // Add the new node to the end of the queue
-        queue_node_t it = (queue_node_t) q->head;
-        while (it->next) {
-            it = it->next;
-        }
-        new_node->prev = it;
-        it->next = new_node;
-    }
-    
-    return SUCCESS;
-}
-
-static
-int _queue_remove_key(_queue_t queue, void *key, int (*compare)(void *key1, void *key2)) {
-    queue_node_t it = (queue_node_t) queue->head;
-    if (!it) {
-        return NULL_POINTER_EXCEPTION;
-    }
-
-    while (it) {
-        if (!compare(key, it->key)) {
-            queue_node_t prev = it->prev;
-            queue_node_t next = it->next;
-            
-            queue->length--;
-            
-            if (!prev) {
-                queue->head = next;
-            } else if (!next) {
-                prev->next = NULL;
-            } else {
-                prev->next = next;
-                next->prev = prev;
-            }
-            
-            free(it);
-            
-            return SUCCESS;
-        }
-        it = it->next;
-    }
-    return KEY_NOT_FOUND_EXCEPTION;
-}
-
-static void *_queue_get_key(queue_node_t it, int index) {
-    while (index > 0) {
-        index--;
-        it = it->next;
-    }
-    return it->key;
-}
-
-static void _queue_iterate(queue_node_t q, void (*iterator)(void *key)) {
-    while (q) {
-        iterator(q->key);
-        q = q->next;
-    }
-}
-// Doubly linked list queue
-
+/* Array implementation */
+static void rnd_queue_delete(void *head);
+static int rnd_queue_push(queue_t q, void *key);
+static int rnd_queue_remove_key(queue_t q, void *key,
+    int (*compare)(void *key1, void *key2));
+static void *rnd_queue_get_key(void *head, int index);
+static void rnd_queue_iterate(void *head, void (*iterator)(void *key));
 
 queue_t queue_new(balancing_policy_t balancing_policy) {
     _queue_t result = NULL;
+    
+    if (balancing_policy != ROUND_ROBIN &&
+        balancing_policy != RANDOM &&
+        balancing_policy != USER_DEFINED) {
+        return NULL;
+    }
     
     result = (_queue_t) malloc(sizeof(struct __queue_t));
     if (!result) {
         goto end;
     }
+    
+    // Initialize the queue data structure
     result->balancing_policy = balancing_policy;
     result->head = NULL;
     result->length = 0;
     result->dependencies_did_init = 0;
     
-    if (balancing_policy == RANDOM) {
-        result->delete = (void (*)(void *)) _queue_delete;
-        result->push = _queue_push;
-        result->remove_key = _queue_remove_key;
-        result->iterate = (void (*)(void *head, void (*iterator)(void *key))) _queue_iterate;
+    if (balancing_policy == ROUND_ROBIN) {
+        queue_init(result,
+            rr_queue_delete,
+            rr_queue_push,
+            rr_queue_remove_key,
+            rr_queue_get_key,
+            rr_queue_iterate);
+    } else if (balancing_policy == RANDOM) {
+        queue_init(result,
+            rnd_queue_delete,
+            rnd_queue_push,
+            rnd_queue_remove_key,
+            rnd_queue_get_key,
+            rnd_queue_iterate);
+    } else if (balancing_policy == USER_DEFINED) {
+        // To be filled by calling queue_init
+    } else {
+        queue_delete(result);
+        return NULL;
     }
     
 end:
     return result;
+}
+
+void queue_init(queue_t queue,
+    void (*delete)(void *head),
+    int (*push)(queue_t queue, void *key),
+    int (*remove_key)(queue_t queue, void *key,
+        int (*compare)(void *key1, void *key2)),
+    void *(*get_key)(void *head, int index),
+    void (*iterate)(void *head, void (*iterator)(void *key))) {
+
+    _queue_t q = (_queue_t) queue;
+    q->delete = delete;
+    q->push = push;
+    q->remove_key = remove_key;
+    q->get_key = get_key;
+    q->iterate = iterate;
 }
 
 void queue_delete(queue_t queue) {
@@ -209,7 +164,9 @@ int queue_push(queue_t queue, void *key) {
     return result;
 }
 
-int queue_remove_key(queue_t queue, void *key, int (*compare)(void *key1, void *key2)) {
+int queue_remove_key(queue_t queue, void *key,
+    int (*compare)(void *key1, void *key2)) {
+    
     _queue_t q = (_queue_t) queue;
     
     if (!q || !q->head) {
@@ -235,9 +192,19 @@ void *queue_get_key(queue_t queue) {
         srand(time(NULL));
     }
     
-    int index = rand() % q->length;
+    int index = -1;
     
-    return _queue_get_key((queue_node_t) q->head, index);
+    if (q->balancing_policy == USER_DEFINED) {
+
+    } else if (q->balancing_policy == RANDOM) {
+        index = rand() % q->length;
+    } else if (q->balancing_policy == ROUND_ROBIN) {
+        
+    } else {
+        return NULL;
+    }
+    
+    return q->get_key(q->head, index);
 }
 
 void queue_iterate(queue_t queue, void (*iterator)(void *key)) {
@@ -246,6 +213,260 @@ void queue_iterate(queue_t queue, void (*iterator)(void *key)) {
     }
     _queue_t q = (_queue_t) queue;
     if (q->length && q->head) {
-        q->iterate((queue_node_t) q->head, iterator);
+        q->iterate(q->head, iterator);
     }
+}
+
+
+// Doubly linked list queue (circular)
+typedef struct __queue_node_t {
+    void *key;
+    struct __queue_node_t *prev;
+    struct __queue_node_t *next;
+} *queue_node_t;
+
+typedef struct __array_queue_t {
+    void **data;      // Data allocated
+    long capacity;    // Total capacity of allocated data
+    long size;        // Current number of elements in the queue
+} *array_queue_t;
+
+void rr_queue_delete(void *queue) {
+    queue_node_t q = (queue_node_t) queue;
+    if (!q) {
+        return;
+    }
+
+    queue_node_t head = q;
+    if (q->next == head) {
+        free(q);
+    } else {
+        queue_node_t next = q->next;
+        do {
+            free(q);
+            q = next;
+            next = next->next;
+        } while (next != head);
+        free(q);
+    }
+}
+
+int rr_queue_push(queue_t queue, void *key) {
+    _queue_t q = (_queue_t) queue;
+    queue_node_t new_node = (queue_node_t)
+        malloc(sizeof(struct __queue_node_t));
+    
+    if (!new_node) {
+        return OUT_OF_MEMORY_EXCEPTION;
+    }
+    
+    new_node->key = key;
+    new_node->prev = new_node->next = new_node;
+    
+    if (!q->head) {
+        // Set the queue's head to the new node
+        q->head = new_node;
+    } else {
+        // Add the new node to the end of the queue
+        queue_node_t head = (queue_node_t) q->head;
+        queue_node_t prev = (queue_node_t) head->prev;
+        prev->next = new_node;
+        new_node->prev = prev;
+        new_node->next = q->head;
+        head->prev = new_node;
+    }
+    
+    return SUCCESS;
+}
+
+int rr_queue_remove_key(queue_t queue, void *key,
+    int (*compare)(void *key1, void *key2)) {
+    
+    _queue_t q = (_queue_t) queue;
+    queue_node_t head = (queue_node_t) q->head;
+    if (!head) {
+        return NULL_POINTER_EXCEPTION;
+    }
+
+    queue_node_t it = head;
+    
+    while (it) {
+        if (!compare(key, it->key)) {
+            queue_node_t prev = it->prev;
+            queue_node_t next = it->next;
+            
+            q->length--;
+            
+            if (q->length > 0) {
+                prev->next = next;
+                next->prev = prev;
+                q->head = next;
+            } else {
+                q->head = NULL;
+            }
+            
+            free(it);
+            
+            return SUCCESS;
+        }
+        it = it->next;
+        if (it == head) {
+            break;
+        }
+    }
+    return KEY_NOT_FOUND_EXCEPTION;
+}
+
+void *rr_queue_get_key(void *head, int index) {
+    queue_node_t it = (queue_node_t) head;
+    queue_node_t prev = it->prev;
+    queue_node_t next = it->next;
+    queue_node_t nextnext = next->next;
+    
+    if (next == prev) {
+        return it->key;
+    }
+
+    void *temp = it->key;
+    it->key = next->key;
+    next->key = temp;
+    
+    prev->next = next;
+    next->prev = prev;
+    next->next = it;
+    it->next = nextnext;
+    it->prev = next;
+    nextnext->prev = it;
+    
+    return it->key;
+}
+
+void rr_queue_iterate(void *q, void (*iterator)(void *key)) {
+    queue_node_t head = q;
+    while (head) {
+        iterator(head->key);
+        head = head->next;
+        if (head == q) {
+            break;
+        }
+    }
+}
+// Doubly linked list queue (circular)
+
+// Array
+void rnd_queue_delete(void *head) {
+    array_queue_t it = (array_queue_t) head;
+    if (it) {
+        free(it->data);
+    }
+    free(head);
+}
+
+int rnd_queue_push(queue_t queue, void *key) {
+    _queue_t q = (_queue_t) queue;
+    
+    if (!q) {
+        return NULL_POINTER_EXCEPTION;
+    }
+    
+    array_queue_t head = (array_queue_t) q->head;
+    
+    if (!head) {
+        head = (array_queue_t) malloc(sizeof(struct __array_queue_t));
+        head->capacity = 1024;
+        head->size = 0;
+        head->data = (void **) malloc(head->capacity * sizeof(void *));
+        q->head = head;
+    }
+    
+    if (head->size >= head->capacity) {
+        head->capacity *= 2;
+        void **tmp = (void **) realloc(head->data, head->capacity * sizeof(void *));
+        if (!tmp) {
+            return OUT_OF_MEMORY_EXCEPTION;
+        }
+        head->data = tmp;
+    }
+    
+    head->data[head->size++] = key;
+
+    return 0;
+}
+
+int rnd_queue_remove_key(queue_t queue, void *key,
+    int (*compare)(void *key1, void *key2)) {
+    
+    _queue_t q = (_queue_t) queue;
+    
+    if (!q) {
+        return NULL_POINTER_EXCEPTION;
+    }
+    
+    array_queue_t head = (array_queue_t) q->head;
+    
+    if (!head) {
+        return NULL_POINTER_EXCEPTION;
+    }
+    
+    long index;
+    for (index = 0; index < head->size; index++) {
+        if (!compare(key, head->data[index])) {
+            while (index < head->size) {
+                head->data[index] = head->data[index + 1];
+                index++;
+            }
+            head->size--;
+            q->length--;
+            head->data[head->size] = NULL;
+            break;
+        }
+    }
+
+    return 0;
+}
+
+void *rnd_queue_get_key(void *head, int index) {
+    array_queue_t it = (array_queue_t) head;
+    if (!it || index < 0 || index >= it->size) {
+        return NULL;
+    }
+    return it->data[index];
+}
+
+void rnd_queue_iterate(void *head, void (*iterator)(void *key)) {
+    array_queue_t it = (array_queue_t) head;
+    
+    if (!it) {
+        return;
+    }
+    
+    long index;
+    for (index = 0; index < it->size; index++) {
+        iterator(it->data[index]);
+    }
+}
+
+// Array
+#include <stdio.h>
+void print_pointers(void *key) {
+    printf("%p\n", key);
+}
+
+void queue_debug(queue_t queue) {
+    _queue_t q = (_queue_t) queue;
+    printf("DEBUG %p %p %d\n", q, q->head, q->length);
+    q->iterate(q->head, print_pointers);
+}
+
+float execute_task(void (*task)(void)) {
+    clock_t start = clock();
+    task();
+    clock_t end = clock();
+    float seconds = (float)(end - start) / CLOCKS_PER_SEC;
+    return seconds;
+}
+
+unsigned int queue_get_size(queue_t queue) {
+    _queue_t q = (_queue_t) queue;
+    return !q ? -1 : q->length;
 }

@@ -10,6 +10,7 @@
 		323A21D3186EFB4400050F4E /* queue.c in Sources */ = {isa = PBXBuildFile; fileRef = 323A21D2186EFB4400050F4E /* queue.c */; };
 		3293928F186EE747003D61B4 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 3293923D186EDED5003D61B4 /* main.c */; };
 		32AB65041890F862003AC4EA /* queue_tester.c in Sources */ = {isa = PBXBuildFile; fileRef = 32AB65031890F862003AC4EA /* queue_tester.c */; };
+		32D1AB4D18A89FD80071D61D /* worker.c in Sources */ = {isa = PBXBuildFile; fileRef = 32D1AB4C18A89FD80071D61D /* worker.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -30,6 +31,8 @@
 		323A21D2186EFB4400050F4E /* queue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = queue.c; sourceTree = "<group>"; };
 		3293923D186EDED5003D61B4 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		32AB65031890F862003AC4EA /* queue_tester.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = queue_tester.c; sourceTree = "<group>"; };
+		32D1AB4C18A89FD80071D61D /* worker.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = worker.c; sourceTree = "<group>"; };
+		32D1AB4E18A89FE60071D61D /* worker.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = worker.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +61,8 @@
 				323A21D1186EF62E00050F4E /* queue.h */,
 				323A21D2186EFB4400050F4E /* queue.c */,
 				32AB65031890F862003AC4EA /* queue_tester.c */,
+				32D1AB4C18A89FD80071D61D /* worker.c */,
+				32D1AB4E18A89FE60071D61D /* worker.h */,
 			);
 			name = src;
 			path = "broker-impl";
@@ -117,6 +122,7 @@
 				32AB65041890F862003AC4EA /* queue_tester.c in Sources */,
 				3293928F186EE747003D61B4 /* main.c in Sources */,
 				323A21D3186EFB4400050F4E /* queue.c in Sources */,
+				32D1AB4D18A89FD80071D61D /* worker.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

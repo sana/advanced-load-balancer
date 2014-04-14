@@ -24,21 +24,25 @@
 #include <stdio.h>
 #include "queue.h"
 
-static void iterator(void *key) {
+static
+void iterator(void *key) {
     printf("%d\n", (int) key);
 }
 
-static int int_compare(void *key1, void *key2) {
+static
+int int_compare(void *key1, void *key2) {
     return (int) key1 - (int) key2;
 }
 
-static void test_alloc() {
-    queue_t q = queue_new(RANDOM);
+static
+void test_alloc(balancing_policy_t balancing_policy) {
+    queue_t q = queue_new(balancing_policy);
     queue_delete(q);
 }
 
-static void test_features() {
-    queue_t q = queue_new(RANDOM);
+static
+void test_features(balancing_policy_t balancing_policy) {
+    queue_t q = queue_new(balancing_policy);
     long i;
     queue_push(q, (void *) 0x1);
     queue_iterate(q, iterator);
@@ -47,17 +51,19 @@ static void test_features() {
     }
     queue_iterate(q, iterator);
 
-    for (i = 0; i < 10; i++) {
+    for (i = 0; i < 20; i++) {
         printf("[queue_get_key] %p\n", queue_get_key(q));
     }
     
+    queue_iterate(q, iterator);
+
     int result;
     
-    queue_t q_tmp = queue_new(RANDOM);
+    queue_t q_tmp = queue_new(balancing_policy);
     result = queue_remove_key(q_tmp, (void *) 0x100, int_compare);
     printf("[queue_remove_key] NULL_POINTER_EXCEPTION %d\n", result);
     queue_delete(q_tmp);
-    
+
     result = queue_remove_key(q, (void *) 0x100, int_compare);
     printf("[queue_remove_key] KEY_NOT_FOUND_EXCEPTION %d\n", result);
 
@@ -76,8 +82,51 @@ static void test_features() {
     queue_delete(q);
 }
 
+static
+void stress_test(balancing_policy_t balancing_policy) {
+    queue_t q = queue_new(balancing_policy);
+    long i;
+    for (i = 0; i < 1 << 24; i++) {
+        queue_push(q, (void *) i);
+    }
+    queue_delete(q);
+}
+
+static
+void stress_test_round_robin() {
+    stress_test(ROUND_ROBIN);
+}
+
+static
+void stress_test_random() {
+    stress_test(RANDOM);
+}
+
+static
+void debug() {
+    queue_t q = queue_new(ROUND_ROBIN);
+    queue_push(q, (void *) 0x1);
+    printf("Key1 %p\n", queue_get_key(q));
+    
+    queue_push(q, (void *) 0x2);
+    queue_push(q, (void *) 0x3);
+    printf("Key2 %p\n", queue_get_key(q));
+}
+
 int main(void) {
-    test_alloc();
-    test_features();
+    
+#ifdef DEBUG
+    test_alloc(ROUND_ROBIN);
+    test_features(ROUND_ROBIN);
+    
+    test_alloc(RANDOM);
+    test_features(RANDOM);
+#else
+    printf("ROUND_ROBIN %f\n", execute_task(stress_test_round_robin));
+    printf("RANDOM %f\n", execute_task(stress_test_random));
+#endif
+    
+    debug();
+    
     return 0;
 }

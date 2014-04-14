@@ -38,27 +38,48 @@ typedef enum {
     NULL_POINTER_EXCEPTION,
     OUT_OF_MEMORY_EXCEPTION,
     EMPTY_QUEUE_EXCEPTION,
-    KEY_NOT_FOUND_EXCEPTION
+    KEY_NOT_FOUND_EXCEPTION,
+    UNKNOWN_VALUE_EXCEPTION
 } queue_exception_t;
 
 typedef void *queue_t;
 
-/* Creates a new queue. */
+/* Creates a new queue */
 queue_t queue_new(balancing_policy_t balancing_policy);
+
+/* Initializes the callback function for a queue with USER_DEFINED scheduling
+ * policy */
+void queue_init(queue_t queue,
+    void (*delete)(void *head),
+    int (*push)(queue_t queue, void *key),
+    int (*remove_key)(queue_t queue, void *key,
+        int (*compare)(void *key1, void *key2)),
+    void *(*get_key)(void *head, int index),
+    void (*iterate)(void *head, void (*iterator)(void *key)));
 
 /* Frees the memory occupied by this queue. */
 void queue_delete(queue_t queue);
 
-/* Pushes a key in the queue, returns 0 for success and -1 for failure. */
+/* Pushes a key in the queue, returns 0 for success and -1 for failure */
 int queue_push(queue_t queue, void *key);
 
-/* Removes a key from the queue, returns 0 for success and -1 for failure. */
-int queue_remove_key(queue_t queue, void *key, int (*compare)(void *key1, void *key2));
+/* Removes a key from the queue, returns 0 for success and -1 for failure */
+int queue_remove_key(queue_t queue, void *key,
+    int (*compare)(void *key1, void *key2));
 
-/* Returns an element in the queue, according to the queue's balancing policy. */
+/* Returns an element in the queue, according to the queue's balancing policy */
 void *queue_get_key(queue_t queue);
 
 /* Iterates over a queue and calls the iterator for every key in the queue */
 void queue_iterate(queue_t queue, void (*iterator)(void *key));
+
+/* Dissasemblies the queue */
+void queue_debug(queue_t queue);
+
+/* Executes a callback function and returns for how many seconds it ran */
+float execute_task(void (*)(void));
+
+/* Returns the number of elements in the queue */
+unsigned int queue_get_size(queue_t queue);
 
 #endif

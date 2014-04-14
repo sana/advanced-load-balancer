@@ -1,0 +1,79 @@
+Advanced load balancer
+
+1. Overview
+
+  Advanced load balancer is a software that allows efficient and intelligent
+distribution of tasks on server machines. Currently, a task is a UNIX command to
+be executed remotely, but can be easily extended to be absolutely anything. I
+would imagine transferring binaries to be executed remotely.
+  The application is built on top of ZeroMQ and contains 3 components: client,
+broker and server. In the future, I would imagine inter-broker communication to
+handle broker failures. More details about the architecture are available in the
+next section.
+
+2. Problem definiton
+  Executing commands in the cloud is fairly popular nowadays and I wrote an
+advanced load balancer that distributes tasks from clients to servers. The tasks
+are UNIX commands, such as `pwd` or `ls -la`, but the application can be easily
+extended to support the execution of any task, such as user defined computation
+units (e.g. UNIX binaries with arguments).
+  The application was built with the following goals: abstract the available
+server machines for maximum overall throughput (e.g. tasks executed per time
+unit), resource management, analytics (e.g. mechanisms for workload analysis)
+and fault tolerance.
+
+3. Software architecture
+  The application contains 3 components: client, server and broker.
+
+3.1. Client
+  The client simply sends a request to a broker and waits for an answer. In the
+future, I imagine an implementation of a protocol between the client and the
+broker, to support broker's faul tolerance. The client would connect to a
+Zookeeper instance, to read the credentials of an available broker. If the
+broker doesn't show progress, then the task should be restarted with another
+broker. A skeleton of the algorithm is available below.
+
+  task_solved = false
+  zookeeper_instance = ...
+  while !task_solved
+    broker_instance = available_broker(zookeeper_instance);
+
+    task_handle = submit_task(broker_address);
+
+    while !task_completed(task_handle)
+        // do something
+
+        if (task_interrupted(task_handle)) {
+            break;
+        }
+    if task_completed(task_handle)
+        task_solved = true;
+
+  // Task completed: task_handle
+
+3.2. Broker
+  The broker is the most important component of this application. It has to
+handle server failures, abstract the server resources, do resource management
+and to maximize throughput. To support broker failures, the broker should keep
+its state in a Zookeeper instance and recover from there.
+
+  The server resources abstracted are memory, network bandwidth and CPU. I
+implemented several tasks allocation policies and new policies should be easy to
+develop and deploy. On receiving SIGTERM, the broker dumps its state for
+analysis; a similar mechanism can be used to analyze the workload structure and
+optimize the resources allocation policy.
+
+3.3. Server
+  The server is a simple application that executes a shell command. In this
+distributed execution model it doesn't have to be fault tolerant. For long
+running tasks, I would imagine incremental execution of tasks, with the results
+stored in a (distributed) database, e.g. SQL or HBase.
+
+3. Improvments
+
+# Speculative execution of tasks
+#* http://en.wikipedia.org/wiki/Speculative_execution
+#* Let the user specify the optimization vector, e.g. resources versus time
+# Fault tolerant broker
+# Incremental tasks execution
+# Servers load graphics, for a given workload

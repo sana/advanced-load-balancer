@@ -1,31 +1,25 @@
 #!/bin/bash
 
+echo 'LSOC:' `cat */*/*.c | wc -l`
+
 ./broker &
 
-./client "ls -la" &
-./client "pwd" &
-./client "ls -la" &
-./client "pwd" &
-./client "ls -la" &
-./client "pwd" &
-./client "ls -la" &
-./client "pwd" &
-./client "ls -la" &
-./client "pwd" &
-./client "ls -la" &
-./client "pwd" &
-
 ./server &
-#./server &
-#./server &
+./server &
+./server &
 
-#./client &
-#./client "ls -la" &
-#./client "pwd" &
-#./client "ps aux" &
-#./client "cat /etc/hosts" &
-#./client "host mail.twitter.com" &
-#./client "date" &
+function execute_dummy_task {
+  for i in {1..100}
+  do
+    ./client "uname -a" &
+  done
+}
+
+execute_dummy_task
+
+./client "ping google.com" &
+
+execute_dummy_task
 
 sleep 5
 
