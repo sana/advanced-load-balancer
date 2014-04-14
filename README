@@ -1,5 +1,7 @@
 Advanced load balancer
 
+Author: Laurentiu Dascalu (dascalu.laurentziu at gmail.com)
+
 1. Overview
 
   Advanced load balancer is a software that allows efficient and intelligent
@@ -69,11 +71,29 @@ distributed execution model it doesn't have to be fault tolerant. For long
 running tasks, I would imagine incremental execution of tasks, with the results
 stored in a (distributed) database, e.g. SQL or HBase.
 
-3. Improvments
+3. Improvments/Future work
 
-* Speculative execution of tasks
-** http://en.wikipedia.org/wiki/Speculative_execution
-** Let the user specify the optimization vector, e.g. resources versus time
-* Fault tolerant broker
-* Incremental tasks execution
-* Servers load graphics, for a given workload
+3.1. Speculative execution of tasks
+3.1.1 http://en.wikipedia.org/wiki/Speculative_execution
+3.1.2 Let the user specify the optimization vector, e.g. resources versus time
+3.2. Fault tolerant broker
+3.3. Incremental tasks execution
+3.4. Servers load graphics, for a given workload
+3.5. Benchmark against SPEC's benchmarks: http://www.spec.org/benchmarks.html
+
+4. Interviewing
+
+  I like this problem! I am planning to ask candidates for engineering jobs at
+Twitter (BTW, email me at ldascalu at twitter.com if interested) how would they
+solve this problem and what are the trade-offs between various implementations.
+Expect some of the followings:
+
+4.1. How would you guarantee progress if there are clients that submit tasks
+similar to "while (1);"?
+4.2. How can we use machine learning to learn how to better map tasks to
+servers?
+4.3. Does your approach scale to thousands of nodes? What are the challenges
+you foresee at this scale? How would the rollback strategy look for this
+application?
+4.4. Does your approach take advantage of various hardware architectures? e.g.
+we have hetegeneous computers available for tasks execution.
