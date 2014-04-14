@@ -71,9 +71,9 @@ stored in a (distributed) database, e.g. SQL or HBase.
 
 3. Improvments
 
-# Speculative execution of tasks
-#* http://en.wikipedia.org/wiki/Speculative_execution
-#* Let the user specify the optimization vector, e.g. resources versus time
-# Fault tolerant broker
-# Incremental tasks execution
-# Servers load graphics, for a given workload
+* Speculative execution of tasks
+** http://en.wikipedia.org/wiki/Speculative_execution
+** Let the user specify the optimization vector, e.g. resources versus time
+* Fault tolerant broker
+* Incremental tasks execution
+* Servers load graphics, for a given workload
